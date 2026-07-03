@@ -119,6 +119,7 @@ final class MenuBarPinTests: XCTestCase {
         XCTAssertFalse(store.isProviderShownInMenuBar("a"))
         XCTAssertTrue(store.isPinned("a.m2"))
         XCTAssertTrue(store.pinnedGroups.isEmpty)
+        XCTAssertEqual(store.configuredPinnedDescriptorIDsInOrder, ["a.m2"])
 
         let reloaded = LayoutStore(registry: makeRegistry(), defaults: defaults, storageKey: "layout")
         XCTAssertFalse(reloaded.isProviderShownInMenuBar("a"))

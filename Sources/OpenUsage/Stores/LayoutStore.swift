@@ -907,8 +907,7 @@ final class LayoutStore {
         orderedProviders().compactMap { provider in
             guard isProviderEnabled(provider.id),
                   !menuBarHiddenProviderIDs.contains(provider.id) else { return nil }
-            // Keep the strip order matching Customize: always-shown pins first, then expanded ones.
-            let metrics = orderedSupportedMetrics(for: provider.id).filter { pinnedMetricIDs.contains($0.id) }
+            let metrics = orderedPinnedMetrics(for: provider.id)
             return metrics.isEmpty ? nil : ProviderMetrics(
                 provider: provider,
                 alwaysShownMetrics: metrics.filter { !expandedMetricIDs.contains($0.id) },
@@ -920,6 +919,17 @@ final class LayoutStore {
     /// Flattened pinned descriptor ids in display order.
     var pinnedDescriptorIDsInOrder: [String] {
         pinnedGroups.flatMap { $0.metrics.map(\.id) }
+    }
+
+    /// Every configured pin in display order, including selections for temporarily hidden providers.
+    var configuredPinnedDescriptorIDsInOrder: [String] {
+        orderedProviders().flatMap { orderedPinnedMetrics(for: $0.id).map(\.id) }
+    }
+
+    private func orderedPinnedMetrics(for providerID: String) -> [WidgetDescriptor] {
+        let metrics = orderedSupportedMetrics(for: providerID).filter { pinnedMetricIDs.contains($0.id) }
+        return metrics.filter { !expandedMetricIDs.contains($0.id) }
+            + metrics.filter { expandedMetricIDs.contains($0.id) }
     }
 
     private func persistPins() {
